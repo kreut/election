@@ -1,11 +1,9 @@
 pragma solidity ^0.5.0;
 
 contract Election {
-  // Model a candidate
-  // Store candidates
-  // Fetch candidates
-  // Store Candidates Count
+
   address private admin;
+  uint public candidatesCount;
 
   struct Candidate {
     uint id;
@@ -16,7 +14,10 @@ contract Election {
   mapping(address => bool) public voters;
   mapping(uint => Candidate) public candidates;
 
-  uint public candidatesCount;
+  event votedEvent(
+    uint _candidateId
+    );
+
 
   constructor() public {
     admin = msg.sender;
@@ -37,6 +38,7 @@ contract Election {
 
     voters[msg.sender] = true;
     candidates[_candidateId].voteCount ++;
+    emit votedEvent(_candidateId);
 
   }
 

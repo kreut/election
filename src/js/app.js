@@ -2,7 +2,7 @@ App = {
   web3Provider: null,
   contracts: {},
   account: '0x0',
-
+  loading: false,
   init: async () =>{
     return await App.initWeb3();
   },
@@ -24,15 +24,27 @@ App = {
       // Instantiate a new truffle contract from the artifact
       App.contracts.Election = TruffleContract(election);
       App.contracts.Election.setProvider(App.web3Provider);
+      App.listenForEvents();
       return App.render();
     });
+  },
+  listenForEvents: async () => {
+    electionInstance = await App.contracts.Election.deployed();
+    electionInstance.votedEvent({}, {
+        fromBlock: 0,
+        toBlock: 'latest'
+      }).watch( (error, event) => {
+        var message = error ? error : "Event triggered: " + event;
+        console.log(message);
+
+        App.render();
+      });
   },
   castVote: async () => {
     var candidateId = $('#candidatesSelect').val();
     electionInstance = await App.contracts.Election.deployed();
     try {
       result = await electionInstance.vote(candidateId, { from: App.account} );
-      App.render();
     } catch(e) {
       App.handleError(e);
     }
@@ -59,11 +71,15 @@ App = {
 
   },
   render: async () =>  {
+    if (App.loading) {
+      return false;
+    }
+    App.loading = true;
     var electionInstance;
     var loader = $("#loader");
     var content = $("#content");
     loader.show();
-    //content.hide();
+    content.hide();
 
     web3.eth.getCoinbase( (err, account) => {
       if (err === null) {
@@ -85,18 +101,18 @@ App = {
 
     for (var i = 1; i <= candidatesCount; i++) {
       candidate = await electionInstance.candidates(i);
-      console.log(candidate);
+
       var id = candidate[0];
       var name = candidate[1];
       var voteCount = candidate[2];
-      id = 999;
+
       var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>";
       var candidateOption = '<option value="' + id + '">' + name + "</option>";
-      console.log(candidateOption);
+
       candidatesSelect.append(candidateOption);
       candidatesResults.append(candidateTemplate);
     }
-
+    App.loading = false;
     loader.hide();
     content.show();
 

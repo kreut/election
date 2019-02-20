@@ -37,13 +37,20 @@ contract("Election", accounts => {
   it("allows a voter to cast a voter", async () => {
     let candidateId = 1;
     let voting_account = accounts[0];
-    await electionInstance.vote(candidateId, {from: voting_account});//adds one vote to candidate 2
+    let receipt = await electionInstance.vote(candidateId, {from: voting_account});//adds one vote to candidate 2
+
+    truffleAssert.eventEmitted(receipt, 'votedEvent', (ev) => {
+      assert.equal(ev._candidateId.toNumber(), candidateId, "logs the voting event");
+      return true;//just checks that an event occurred
+   });
 
     let candidate = await electionInstance.candidates(candidateId);
     assert.equal(candidate['voteCount'].toNumber(), 1, "it adds a vote for the candidate");
 
     let voter = await electionInstance.voters(voting_account);
     assert(voter, "it marks the voter as having voted");
+
+
 
     await truffleAssert.reverts(
           electionInstance.vote(candidateId, { from: voting_account}),
