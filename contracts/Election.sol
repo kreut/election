@@ -13,6 +13,7 @@ contract Election {
     uint voteCount;
   }
 
+  mapping(address => bool) public voters;
   mapping(uint => Candidate) public candidates;
 
   uint public candidatesCount;
@@ -27,6 +28,16 @@ contract Election {
     require(msg.sender == admin);
     candidatesCount ++;
     candidates[candidatesCount] = Candidate(candidatesCount, _name, 0);
+  }
+
+  function vote(uint _candidateId) public {
+    require(!voters[msg.sender], "You can only vote once.");
+    //_candidate_id should be at least 2 by the constructor, but I'm future-proofing.
+    require(_candidateId >=1  && _candidateId <= candidatesCount, "Invalid Candidate Id.");
+
+    voters[msg.sender] = true;
+    candidates[_candidateId].voteCount ++;
+
   }
 
 

@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Pete's Pet Shop</title>
+    <title>Election</title>
 
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -36,10 +36,19 @@
                     <th scope="col">Votes</th>
                   </tr>
                 </thead>
-                <tbody id="candidateResults">
+                <tbody id="candidatesResults">
                 </tbody>
               </table>
-              <hr/>
+              <hr />
+              <form onSubmit="App.castVote(); return false">
+              <div class="form-group">
+              <label for="candidatesSelect">Select Candidate</label>
+            <select class="form-control" id="candidatesSelect">
+            </select>
+              </div>
+          <button class="btn btn-primary">Vote</button>
+          <hr />
+            </form>
               <p id="accountAddress" class="text-center"></p>
         </div>
       </div>

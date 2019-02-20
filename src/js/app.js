@@ -27,6 +27,37 @@ App = {
       return App.render();
     });
   },
+  castVote: async () => {
+    var candidateId = $('#candidatesSelect').val();
+    electionInstance = await App.contracts.Election.deployed();
+    try {
+      result = await electionInstance.vote(candidateId, { from: App.account} );
+      App.render();
+    } catch(e) {
+      App.handleError(e);
+    }
+
+  },
+  handleError: e => {
+    console.log('error...');
+    //possible errors
+    var messages = ['You can only vote once.', 'Invalid Candidate Id.'];
+    var revert_error = false;
+    $.each(messages, (index, message) =>
+  {
+    console.log(message);
+    if (e.message.indexOf(message) > -1) {
+      revert_error = true;
+      alert(message);
+      return false;
+  }
+    });
+  if (!revert_error){
+    //some unknown error
+    alert(e.message);
+  }
+
+  },
   render: async () =>  {
     var electionInstance;
     var loader = $("#loader");
@@ -45,8 +76,12 @@ App = {
 
     electionInstance = await App.contracts.Election.deployed();
     candidatesCount = await electionInstance.candidatesCount();
-    var candidateResults = $("#candidateResults");
-    candidateResults.empty();
+
+    var candidatesSelect = $("#candidatesSelect");
+    candidatesSelect.empty();
+
+    var candidatesResults = $("#candidatesResults");
+    candidatesResults.empty();
 
     for (var i = 1; i <= candidatesCount; i++) {
       candidate = await electionInstance.candidates(i);
@@ -54,10 +89,12 @@ App = {
       var id = candidate[0];
       var name = candidate[1];
       var voteCount = candidate[2];
-
+      id = 999;
       var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>";
-      console.log(candidateTemplate);
-      candidateResults.append(candidateTemplate);
+      var candidateOption = '<option value="' + id + '">' + name + "</option>";
+      console.log(candidateOption);
+      candidatesSelect.append(candidateOption);
+      candidatesResults.append(candidateTemplate);
     }
 
     loader.hide();
